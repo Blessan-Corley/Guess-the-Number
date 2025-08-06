@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .setup-screen, .game-screen, .result-screen {
+            display: none;
+        }
+
+        .setup-screen.active, .game-screen.active, .result-screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 140px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+
+        .game-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .attempts {
+            font-size: 1.2rem;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        .message {
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .message.too-high {
+            background: linear-gradient(135deg, #feb2b2 0%, #f56565 100%);
+            color: #742a2a;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .message.too-low {
+            background: linear-gradient(135deg, #bee3f8 0%, #4299e1 100%);
+            color: #2a4365;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .message.close {
+            background: linear-gradient(135deg, #faf089 0%, #ecc94b 100%);
+            color: #744210;
+            animation: pulse 1s infinite;
+        }
+
+        .message.correct {
+            background: linear-gradient(135deg, #9ae6b4 0%, #48bb78 100%);
+            color: #22543d;
+            animation: bounce 0.8s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-top: 5px;
+        }
+
+        .emoji {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎯 Number Guesser</h1>
+
+        <!-- Setup Screen -->
+        <div class="setup-screen active" id="setupScreen">
+            <div class="emoji">🎮</div>
+            <p style="color: #4a5568; margin-bottom: 30px; font-size: 1.1rem;">
+                Choose your range and let's see how quickly you can guess my number!
+            </p>
+            
+            <div class="input-group">
+                <label for="startRange">Start Number:</label>
+                <input type="number" id="startRange" value="1" min="1">
+            </div>
+            
+            <div class="input-group">
+                <label for="endRange">End Number:</label>
+                <input type="number" id="endRange" value="100" min="2">
+            </div>
+            
+            <button class="btn" onclick="startGame()">🚀 Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-info">
+                <div class="emoji" id="gameEmoji">🤔</div>
+                <p><strong>Range:</strong> <span id="rangeDisplay"></span></p>
+                <div class="attempts">Attempts: <span id="attemptCount">0</span></div>
+            </div>
+
+            <div class="input-group">
+                <label for="userGuess">Your Guess:</label>
+                <input type="number" id="userGuess" placeholder="Enter your guess">
+            </div>
+
+            <button class="btn" onclick="makeGuess()">🎯 Guess!</button>
+            <button class="btn btn-secondary" onclick="resetGame()">🔄 New Game</button>
+
+            <div class="message" id="messageDisplay"></div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="resultScreen">
+            <div class="emoji">🎉</div>
+            <h2 style="color: #48bb78; margin: 20px 0;">Congratulations!</h2>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="finalAttempts">0</div>
+                    <div class="stat-label">Attempts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="correctNumber">0</div>
+                    <div class="stat-label">The Number</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="gameRange">0</div>
+                    <div class="stat-label">Range Size</div>
+                </div>
+            </div>
+
+            <div id="performanceMessage" style="margin: 20px 0; font-size: 1.2rem; color: #4a5568;"></div>
+
+            <button class="btn" onclick="resetGame()">🎮 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let secretNumber;
+        let attempts;
+        let minRange;
+        let maxRange;
+
+                    // Fun messages for different scenarios
+        const messages = {
+            tooHigh: [
+                "🔥 Whoa there! You're flying too high!",
+                "📈 That's way up in the clouds!",
+                "🚀 Houston, we have a problem - too high!",
+                "⬆️ Nope, bring it down a notch!",
+                "🎈 Your guess is floating away!",
+                "🏔️ That's mountain-top high!"
+            ],
+            tooLow: [
+                "🕳️ That's deeper than a submarine!",
+                "📉 You're underground with that guess!",
+                "⬇️ Think higher, much higher!",
+                "🐠 You're swimming too deep!",
+                "🏠 That's basement level thinking!",
+                "🌊 You're below sea level!"
+            ],
+            closeHigh: [
+                "🔥 You're getting warm, but still too HIGH!",
+                "🎯 Almost there, but go a bit LOWER!",
+                "👀 So close! Just dial it down a little!",
+                "⚡ Hot! But still flying too HIGH!",
+                "🎪 In the neighborhood, but aim LOWER!",
+                "🔍 Burning hot! Come down just a bit!"
+            ],
+            closeLow: [
+                "🔥 You're getting warm, but still too LOW!",
+                "🎯 Almost there, but go a bit HIGHER!",
+                "👀 So close! Just bump it up a little!",
+                "⚡ Hot! But still diving too LOW!",
+                "🎪 In the neighborhood, but aim HIGHER!",
+                "🔍 Burning hot! Climb up just a bit!"
+            ],
+            veryCloseHigh: [
+                "🌟 SO CLOSE! Just a tiny bit LOWER!",
+                "💫 Almost perfect! Go down just a smidge!",
+                "🎊 You're practically there! Slightly LOWER!",
+                "🔥 BURNING HOT! Just nudge it down!",
+                "⭐ Right on the edge! Think LOWER!"
+            ],
+            veryCloseLow: [
+                "🌟 SO CLOSE! Just a tiny bit HIGHER!",
+                "💫 Almost perfect! Go up just a smidge!",
+                "🎊 You're practically there! Slightly HIGHER!",
+                "🔥 BURNING HOT! Just nudge it up!",
+                "⭐ Right on the edge! Think HIGHER!"
+            ]
+        };
+
+        function startGame() {
+            const start = parseInt(document.getElementById('startRange').value);
+            const end = parseInt(document.getElementById('endRange').value);
+
+            if (start >= end) {
+                alert('🤔 Start number must be less than end number!');
+                return;
+            }
+
+            minRange = start;
+            maxRange = end;
+            secretNumber = Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
+            attempts = 0;
+
+            document.getElementById('rangeDisplay').textContent = `${minRange} - ${maxRange}`;
+            document.getElementById('attemptCount').textContent = attempts;
+            document.getElementById('userGuess').value = '';
+            document.getElementById('messageDisplay').textContent = '';
+            document.getElementById('messageDisplay').className = 'message';
+
+            switchScreen('gameScreen');
+        }
+
+        function makeGuess() {
+            const userInput = document.getElementById('userGuess');
+            const guess = parseInt(userInput.value);
+
+            if (isNaN(guess)) {
+                alert('🤖 Please enter a valid number!');
+                return;
+            }
+
+            if (guess < minRange || guess > maxRange) {
+                alert(`🎯 Please guess between ${minRange} and ${maxRange}!`);
+                return;
+            }
+
+            attempts++;
+            document.getElementById('attemptCount').textContent = attempts;
+
+            const messageDiv = document.getElementById('messageDisplay');
+            const emojiDiv = document.getElementById('gameEmoji');
+            const difference = Math.abs(guess - secretNumber);
+            const range = maxRange - minRange;
+
+            if (guess === secretNumber) {
+                // Correct guess!
+                messageDiv.textContent = `🎉 AMAZING! You got it in ${attempts} ${attempts === 1 ? 'try' : 'tries'}!`;
+                messageDiv.className = 'message correct';
+                emojiDiv.textContent = '🎉';
+                
+                setTimeout(() => {
+                    showResults();
+                }, 2000);
+            } else {
+                // Wrong guess - determine how close
+                const closeThreshold = Math.max(1, Math.floor(range * 0.1)); // 10% of range
+                const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05)); // 5% of range
+
+                if (difference <= veryCloseThreshold) {
+                    // Very close - but still indicate high or low
+                    if (guess > secretNumber) {
+                        messageDiv.textContent = getRandomMessage('veryCloseHigh');
+                        messageDiv.className = 'message close';
+                        emojiDiv.textContent = '🔥⬇️';
+                    } else {
+                        messageDiv.textContent = getRandomMessage('veryCloseLow');
+                        messageDiv.className = 'message close';
+                        emojiDiv.textContent = '🔥⬆️';
+                    }
+                } else if (difference <= closeThreshold) {
+                    // Close - but still indicate high or low
+                    if (guess > secretNumber) {
+                        messageDiv.textContent = getRandomMessage('closeHigh');
+                        messageDiv.className = 'message close';
+                        emojiDiv.textContent = '🎯⬇️';
+                    } else {
+                        messageDiv.textContent = getRandomMessage('closeLow');
+                        messageDiv.className = 'message close';
+                        emojiDiv.textContent = '🎯⬆️';
+                    }
+                } else if (guess > secretNumber) {
+                    // Too high
+                    messageDiv.textContent = getRandomMessage('tooHigh');
+                    messageDiv.className = 'message too-high';
+                    emojiDiv.textContent = '📈';
+                } else {
+                    // Too low
+                    messageDiv.textContent = getRandomMessage('tooLow');
+                    messageDiv.className = 'message too-low';
+                    emojiDiv.textContent = '📉';
+                }
+            }
+
+            userInput.value = '';
+            userInput.focus();
+        }
+
+        function getRandomMessage(type) {
+            const messageArray = messages[type];
+            return messageArray[Math.floor(Math.random() * messageArray.length)];
+        }
+
+        function showResults() {
+            document.getElementById('finalAttempts').textContent = attempts;
+            document.getElementById('correctNumber').textContent = secretNumber;
+            document.getElementById('gameRange').textContent = maxRange - minRange + 1;
+
+            // Performance message
+            const range = maxRange - minRange + 1;
+            const optimalAttempts = Math.ceil(Math.log2(range));
+            let performanceMsg;
+
+            if (attempts === 1) {
+                performanceMsg = "🍀 Incredible! First try! Are you a mind reader?";
+            } else if (attempts <= optimalAttempts) {
+                performanceMsg = "🧠 Excellent strategy! You played like a pro!";
+            } else if (attempts <= optimalAttempts * 1.5) {
+                performanceMsg = "👍 Great job! Well played!";
+            } else if (attempts <= optimalAttempts * 2) {
+                performanceMsg = "😊 Good effort! You got there in the end!";
+            } else {
+                performanceMsg = "🎯 Mission accomplished! Practice makes perfect!";
+            }
+
+            document.getElementById('performanceMessage').textContent = performanceMsg;
+            switchScreen('resultScreen');
+        }
+
+        function resetGame() {
+            switchScreen('setupScreen');
+            document.getElementById('startRange').value = 1;
+            document.getElementById('endRange').value = 100;
+        }
+
+        function switchScreen(screenId) {
+            const screens = ['setupScreen', 'gameScreen', 'resultScreen'];
+            screens.forEach(screen => {
+                document.getElementById(screen).classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Enter key support
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeScreen = document.querySelector('.setup-screen.active, .game-screen.active');
+                if (activeScreen) {
+                    if (activeScreen.id === 'setupScreen') {
+                        startGame();
+                    } else if (activeScreen.id === 'gameScreen') {
+                        makeGuess();
+                    }
+                }
+            }
+        });
+
+        // Auto-focus on input fields
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('startRange').focus();
+        });
+    </script>
+</body>
+</html>
