@@ -309,14 +309,11 @@
             console.log('%c│                                            │', 'color: #667eea; font-size: 14px;');
             console.log('%c│    Designed & Developed by Blessan Corley  │', 'color: #f093fb; font-size: 14px; font-weight: 600;');
             console.log('%c│                                            │', 'color: #667eea; font-size: 14px;');
-            console.log('%c│  Tech Stack: HTML5, CSS3, Vanilla JS      │', 'color: #48bb78; font-size: 12px;');
-            console.log('%c│  Features: Responsive Design, Animations  │', 'color: #48bb78; font-size: 12px;');
-            console.log('%c│                                            │', 'color: #667eea; font-size: 14px;');
             console.log('%c└────────────────────────────────────────────┘', 'color: #667eea; font-size: 14px;');
             console.log('%c🎯 Ready to test your guessing skills?', 'color: #e53e3e; font-size: 14px; font-weight: bold;');
         }
 
-                    // Fun messages for different scenarios
+                    
         const messages = {
             tooHigh: [
                 "🔥 Whoa there! You're flying too high!",
@@ -412,7 +409,7 @@
             const range = maxRange - minRange;
 
             if (guess === secretNumber) {
-                // Correct guess!
+                
                 messageDiv.textContent = `🎉 AMAZING! You got it in ${attempts} ${attempts === 1 ? 'try' : 'tries'}!`;
                 messageDiv.className = 'message correct';
                 emojiDiv.textContent = '🎉';
@@ -421,12 +418,12 @@
                     showResults();
                 }, 2000);
             } else {
-                // Wrong guess - determine how close
-                const closeThreshold = Math.max(1, Math.floor(range * 0.1)); // 10% of range
-                const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05)); // 5% of range
+                
+                const closeThreshold = Math.max(1, Math.floor(range * 0.1)); 
+                const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05)); 
 
                 if (difference <= veryCloseThreshold) {
-                    // Very close - but still indicate high or low
+                    
                     if (guess > secretNumber) {
                         messageDiv.textContent = getRandomMessage('veryCloseHigh');
                         messageDiv.className = 'message close';
@@ -437,7 +434,7 @@
                         emojiDiv.textContent = '🔥⬆️';
                     }
                 } else if (difference <= closeThreshold) {
-                    // Close - but still indicate high or low
+                    
                     if (guess > secretNumber) {
                         messageDiv.textContent = getRandomMessage('closeHigh');
                         messageDiv.className = 'message close';
@@ -448,12 +445,12 @@
                         emojiDiv.textContent = '🎯⬆️';
                     }
                 } else if (guess > secretNumber) {
-                    // Too high
+                    
                     messageDiv.textContent = getRandomMessage('tooHigh');
                     messageDiv.className = 'message too-high';
                     emojiDiv.textContent = '📈';
                 } else {
-                    // Too low
+                    
                     messageDiv.textContent = getRandomMessage('tooLow');
                     messageDiv.className = 'message too-low';
                     emojiDiv.textContent = '📉';
@@ -474,7 +471,7 @@
             document.getElementById('correctNumber').textContent = secretNumber;
             document.getElementById('gameRange').textContent = maxRange - minRange + 1;
 
-            // Performance message
+            
             const range = maxRange - minRange + 1;
             const optimalAttempts = Math.ceil(Math.log2(range));
             let performanceMsg;
@@ -509,7 +506,7 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        // Enter key support
+        
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const activeScreen = document.querySelector('.setup-screen.active, .game-screen.active');
@@ -523,7 +520,7 @@
             }
         });
 
-        // Auto-focus on input fields
+        
         document.addEventListener('DOMContentLoaded', function() {
             displayDeveloperCredits();
             document.getElementById('startRange').focus();
